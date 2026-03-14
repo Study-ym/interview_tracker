@@ -14,6 +14,15 @@ import {
 
 dotenv.config();
 
+// MySQL JSON 字段可能已自动解析为对象，也可能是字符串，统一处理
+function parseJSON(val, fallback = []) {
+  if (val === null || val === undefined) return fallback;
+  if (typeof val === 'string') {
+    try { return JSON.parse(val); } catch { return fallback; }
+  }
+  return val;
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -82,13 +91,13 @@ app.get('/jobs', authMiddleware, async (req, res) => {
         );
         return { 
           ...round, 
-          questions: questions.map(q => ({ ...q, tags: JSON.parse(q.tags || '[]') }))
+          questions: questions.map(q => ({ ...q, tags: parseJSON(q.tags) }))
         };
       }));
       
       return { 
         ...job, 
-        tags: JSON.parse(job.tags || '[]'),
+        tags: parseJSON(job.tags),
         rounds: roundsWithQuestions 
       };
     }));
@@ -109,7 +118,7 @@ app.post('/jobs', authMiddleware, async (req, res) => {
       [req.userId, company, position, salary || '', JSON.stringify(tags || []), notes || '', status || 'active']
     );
     const [rows] = await pool.query(`SELECT * FROM job_applications WHERE id = (SELECT id FROM job_applications WHERE user_id = ? ORDER BY created_at DESC LIMIT 1)`, [req.userId]);
-    res.json({ ...rows[0], tags: JSON.parse(rows[0].tags || '[]'), rounds: [] });
+    res.json({ ...rows[0], tags: parseJSON(rows[0].tags), rounds: [] });
   } catch (error) {
     console.error('创建失败:', error);
     res.status(500).json({ message: '创建失败' });
@@ -128,7 +137,7 @@ app.put('/jobs/:id', authMiddleware, async (req, res) => {
     );
     const [rows] = await pool.query(`SELECT * FROM job_applications WHERE id = ?`, [id]);
     if (rows.length === 0) return res.status(404).json({ message: '未找到' });
-    res.json({ ...rows[0], tags: JSON.parse(rows[0].tags || '[]') });
+    res.json({ ...rows[0], tags: parseJSON(rows[0].tags) });
   } catch (error) {
     console.error('更新失败:', error);
     res.status(500).json({ message: '更新失败' });
@@ -203,7 +212,7 @@ app.post('/rounds/:roundId/questions', authMiddleware, async (req, res) => {
       [roundId, req.userId, content, answer || '', JSON.stringify(tags || [])]
     );
     const [rows] = await pool.query(`SELECT * FROM questions WHERE round_id = ? AND user_id = ? ORDER BY created_at DESC LIMIT 1`, [roundId, req.userId]);
-    res.json({ ...rows[0], tags: JSON.parse(rows[0].tags || '[]') });
+    res.json({ ...rows[0], tags: parseJSON(rows[0].tags) });
   } catch (error) {
     console.error('创建题目失败:', error);
     res.status(500).json({ message: '创建失败' });
@@ -220,7 +229,7 @@ app.put('/rounds/:roundId/questions/:qId', authMiddleware, async (req, res) => {
     );
     const [rows] = await pool.query(`SELECT * FROM questions WHERE id = ?`, [qId]);
     if (rows.length === 0) return res.status(404).json({ message: '未找到' });
-    res.json({ ...rows[0], tags: JSON.parse(rows[0].tags || '[]') });
+    res.json({ ...rows[0], tags: parseJSON(rows[0].tags) });
   } catch (error) {
     console.error('更新题目失败:', error);
     res.status(500).json({ message: '更新失败' });

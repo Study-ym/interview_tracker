@@ -116,11 +116,6 @@ export async function verifyCode(phone, code) {
 
 // ─── 获取或创建用户 ───
 export async function getOrCreateUser(phone) {
-  if (process.env.NODE_ENV === 'development') {
-    // 开发模式返回模拟用户
-    return { id: `dev_${phone}`, phone };
-  }
-  
   let [rows] = await pool.query(`SELECT id, phone FROM users WHERE phone = ?`, [phone]);
   
   if (rows.length === 0) {

@@ -71,7 +71,7 @@ export type QuestionDTO = {
   content: string;
   answer: string;
   tags: string[];
-  createdAt: string;
+  created_at: string;
 };
 
 export type RoundDTO = {
@@ -84,8 +84,8 @@ export type RoundDTO = {
   interviewer: string;
   notes: string;
   questions: QuestionDTO[];
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export type JobApplicationDTO = {
@@ -97,6 +97,6 @@ export type JobApplicationDTO = {
   notes: string;
   status: string;
   rounds: RoundDTO[];
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 };

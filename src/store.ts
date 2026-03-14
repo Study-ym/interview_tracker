@@ -25,13 +25,13 @@ function dtoToJob(dto: JobApplicationDTO): JobApplication {
         content: q.content,
         answer: q.answer,
         tags: q.tags,
-        createdAt: new Date(q.createdAt).getTime(),
+        createdAt: new Date(q.created_at).getTime(),
       })),
-      createdAt: new Date(r.createdAt).getTime(),
-      updatedAt: new Date(r.updatedAt).getTime(),
+      createdAt: new Date(r.created_at).getTime(),
+      updatedAt: new Date(r.updated_at).getTime(),
     })),
-    createdAt: new Date(dto.createdAt).getTime(),
-    updatedAt: new Date(dto.updatedAt).getTime(),
+    createdAt: new Date(dto.created_at).getTime(),
+    updatedAt: new Date(dto.updated_at).getTime(),
   };
 }
 
@@ -114,8 +114,8 @@ export async function createRoundOnServer(
     interviewer: dto.interviewer,
     notes: dto.notes,
     questions: [],
-    createdAt: new Date(dto.createdAt).getTime(),
-    updatedAt: new Date(dto.updatedAt).getTime(),
+    createdAt: new Date(dto.created_at).getTime(),
+    updatedAt: new Date(dto.updated_at).getTime(),
   };
 }
 
@@ -131,7 +131,7 @@ export async function updateRoundOnServer(jobId: string, round: Round): Promise<
   });
   return {
     ...round,
-    updatedAt: new Date(dto.updatedAt).getTime(),
+    updatedAt: new Date(dto.updated_at).getTime(),
   };
 }
 
@@ -150,7 +150,7 @@ export async function createQuestionOnServer(
     content: dto.content,
     answer: dto.answer,
     tags: dto.tags,
-    createdAt: new Date(dto.createdAt).getTime(),
+    createdAt: new Date(dto.created_at).getTime(),
   };
 }
 
