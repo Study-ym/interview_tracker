@@ -29,7 +29,7 @@ export function authMiddleware(req, res, next) {
   next();
 }
 
-// ─── 发送短信验证码（腾讯云）───
+// ─── 发送短信验证码（腾讯云或阿里云）───
 export async function sendSMS(phone, code) {
   // 开发环境直接打印验证码，不真实发送
   if (process.env.NODE_ENV === 'development') {
@@ -37,7 +37,17 @@ export async function sendSMS(phone, code) {
     return;
   }
 
-  // 生产环境调用腾讯云 SMS
+  // 使用阿里云短信
+  if (process.env.SMS_PROVIDER === 'aliyun') {
+    return sendSMSAliyun(phone, code);
+  }
+
+  // 默认使用腾讯云短信
+  return sendSMSTencent(phone, code);
+}
+
+// ─── 腾讯云短信 ───
+async function sendSMSTencent(phone, code) {
   const SmsClient = tencentcloud.sms.v20210111.Client;
   const client = new SmsClient({
     credential: {
@@ -54,6 +64,37 @@ export async function sendSMS(phone, code) {
     TemplateId: process.env.TENCENT_SMS_TEMPLATE_ID,
     TemplateParamSet: [code, '5'], // 验证码和有效期（分钟）
   });
+}
+
+// ─── 阿里云短信 ───
+async function sendSMSAliyun(phone, code) {
+  try {
+    const Dysmsapi = (await import('@alicloud/dysmsapi20170525')).default;
+    const OpenApi = (await import('@alicloud/openapi-client')).default;
+
+    const config = new OpenApi.Config({
+      accessKeyId: process.env.ALIYUN_ACCESS_KEY_ID,
+      accessKeySecret: process.env.ALIYUN_ACCESS_KEY_SECRET,
+    });
+    config.endpoint = 'dysmsapi.aliyuncs.com';
+    const client = new Dysmsapi(config);
+
+    const SendSmsRequest = (await import('@alicloud/dysmsapi20170525')).SendSmsRequest;
+    const req = new SendSmsRequest({
+      phoneNumbers: phone,
+      signName: process.env.ALIYUN_SMS_SIGN,
+      templateCode: process.env.ALIYUN_SMS_TEMPLATE_CODE,
+      templateParam: JSON.stringify({ code }),
+    });
+
+    const result = await client.sendSms(req);
+    if (result.body.code !== 'OK') {
+      throw new Error(`短信发送失败: ${result.body.message}`);
+    }
+  } catch (error) {
+    console.error('阿里云短信发送失败:', error);
+    throw error;
+  }
 }
 
 // ─── 生成 6 位随机验证码 ───

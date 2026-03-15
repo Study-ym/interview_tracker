@@ -1,4 +1,4 @@
-export type RoundStatus = 'pending' | 'passed' | 'failed' | 'offer' | 'ghost';
+export type RoundStatus = 'pending' | 'passed' | 'failed' | 'offer';
 
 export type JobStatus = 'active' | 'offer' | 'closed';
 

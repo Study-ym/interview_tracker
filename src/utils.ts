@@ -5,7 +5,6 @@ export const ROUND_STATUS_LABEL: Record<RoundStatus, string> = {
   passed: '已通过',
   failed: '已挂',
   offer: 'Offer',
-  ghost: '已鬼',
 };
 
 export const ROUND_STATUS_COLOR: Record<RoundStatus, string> = {
@@ -13,7 +12,6 @@ export const ROUND_STATUS_COLOR: Record<RoundStatus, string> = {
   passed: 'var(--status-passed)',
   failed: 'var(--status-failed)',
   offer: 'var(--status-offer)',
-  ghost: 'var(--status-ghost)',
 };
 
 export const JOB_STATUS_LABEL: Record<JobStatus, string> = {

@@ -449,6 +449,10 @@ a { color: inherit; text-decoration: none; }
 .q-answer p { font-size: 13.5px; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; }
 .q-item-actions { display: flex; gap: 12px; }
 
+.filter-row-group {
+  display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+}
+
 /* ─── Bottom Tab Bar ─── */
 .tab-bar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;

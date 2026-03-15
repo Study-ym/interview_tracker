@@ -13,7 +13,7 @@ interface Props {
   onCancel: () => void;
 }
 
-const ALL_ROUND_STATUSES: RoundStatus[] = ['pending', 'passed', 'failed', 'offer', 'ghost'];
+const ALL_ROUND_STATUSES: RoundStatus[] = ['pending', 'passed', 'failed', 'offer'];
 
 const POSITION_OPTIONS = [
   '前端开发', '后端开发', '算法工程师', '产品经理', '测试工程师', '数据分析', '运维/DevOps',
@@ -253,6 +253,7 @@ function RoundForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [autoPassedName, setAutoPassedName] = useState<string | null>(null);
 
   function validate() {
     const e: Record<string, string> = {};
@@ -270,7 +271,19 @@ function RoundForm({
     const payload = { name: nameVal, date: form.date, time: form.time, status: form.status, location: locationVal, interviewer: '', notes: form.notes };
     try {
       let savedRound: Round;
+      let updatedJob = job;
+      
+      // 编辑轮次时，自动将前一轮置为已通过
       if (round) {
+        const roundIndex = job.rounds.findIndex(r => r.id === round.id);
+        if (roundIndex > 0) {
+          const prevRound = job.rounds[roundIndex - 1];
+          if (prevRound.status !== 'passed') {
+            const updatedPrevRound = await updateRoundOnServer(job.id, { ...prevRound, status: 'passed' });
+            updatedJob = updateRound(updatedJob, updatedPrevRound);
+            setAutoPassedName(prevRound.name || `第${roundIndex}轮`);
+          }
+        }
         const updated = await updateRoundOnServer(job.id, { ...round, ...payload });
         savedRound = updated;
       } else {
@@ -296,7 +309,7 @@ function RoundForm({
       }
 
       const finalRound: Round = { ...savedRound, questions: newQuestions };
-      const jobWithRound = round ? updateRound(job, finalRound) : addRound(job, finalRound);
+      const jobWithRound = round ? updateRound(updatedJob, finalRound) : addRound(updatedJob, finalRound);
       onSave(jobWithRound);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : '保存失败，请重试');
@@ -326,6 +339,11 @@ function RoundForm({
           已自动将上一轮次面试结果置为「已通过」
         </div>
       )}
+      {autoPassedName && (
+        <div className="round-form-tip">
+          已自动将「{autoPassedName}」的面试结果置为「已通过」
+        </div>
+      )}
       <div className="form-section">
         <h3 className="section-label">轮次信息</h3>
         <div className="form-row">
@@ -340,11 +358,14 @@ function RoundForm({
             )}
           </div>
           <div className="form-field">
-            <label>面试时间</label>
-            <select className="input select-input" value={form.time} onChange={e => setForm(p => ({ ...p, time: e.target.value }))}>
+            <label>地点/方式</label>
+            <select className="input select-input" value={form.locationSelect} onChange={e => setForm(p => { const v = e.target.value; return { ...p, locationSelect: v, location: v === '其他' ? p.locationCustom : v }; })}>
               <option value="">请选择</option>
-              {TIME_OPTIONS_30MIN.map(t => <option key={t} value={t}>{t}</option>)}
+              {LOCATION_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
+            {form.locationSelect === '其他' && (
+              <input className="input" placeholder="e.g. 北京朝阳区" value={form.locationCustom} onChange={e => setForm(p => ({ ...p, locationCustom: e.target.value, location: e.target.value }))} style={{ marginTop: 8 }} />
+            )}
           </div>
         </div>
         <div className="form-row">
@@ -354,14 +375,11 @@ function RoundForm({
             {errors.date && <span className="error-msg">{errors.date}</span>}
           </div>
           <div className="form-field">
-            <label>地点/方式</label>
-            <select className="input select-input" value={form.locationSelect} onChange={e => setForm(p => { const v = e.target.value; return { ...p, locationSelect: v, location: v === '其他' ? p.locationCustom : v }; })}>
+            <label>面试时间</label>
+            <select className="input select-input" value={form.time} onChange={e => setForm(p => ({ ...p, time: e.target.value }))}>
               <option value="">请选择</option>
-              {LOCATION_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              {TIME_OPTIONS_30MIN.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
-            {form.locationSelect === '其他' && (
-              <input className="input" placeholder="e.g. 北京朝阳区" value={form.locationCustom} onChange={e => setForm(p => ({ ...p, locationCustom: e.target.value, location: e.target.value }))} style={{ marginTop: 8 }} />
-            )}
           </div>
         </div>
         <div className="form-field">

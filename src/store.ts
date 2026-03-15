@@ -233,7 +233,7 @@ export function deleteRound(job: JobApplication, roundId: string): JobApplicatio
 
 function deriveJobStatus(rounds: Round[]): JobApplication['status'] {
   if (rounds.some(r => r.status === 'offer')) return 'offer';
-  if (rounds.some(r => r.status === 'failed' || r.status === 'ghost')) return 'closed';
+  if (rounds.some(r => r.status === 'failed')) return 'closed';
   return 'active';
 }
 

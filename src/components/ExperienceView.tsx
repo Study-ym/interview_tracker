@@ -41,11 +41,16 @@ export function ExperienceView({ jobs, onSelectJob, onGoHome }: Props) {
   const [search, setSearch] = useState('');
   const [filterTag, setFilterTag] = useState<string | 'all'>('all');
   const [filterCompany, setFilterCompany] = useState<string | 'all'>('all');
+  const [filterDepartment, setFilterDepartment] = useState<string | 'all'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const allItems = useMemo(() => flattenQuestions(jobs), [jobs]);
   const tags = useMemo(() => getAllTags(jobs), [jobs]);
   const companies = useMemo(() => [...new Set(jobs.map(j => j.company))].sort(), [jobs]);
+  const departments = useMemo(() =>
+    [...new Set(jobs.map(j => j.department).filter((d): d is string => !!d))].sort(),
+    [jobs]
+  );
 
   const filtered = useMemo(() => {
     return allItems.filter(({ question, job }) => {
@@ -55,9 +60,10 @@ export function ExperienceView({ jobs, onSelectJob, onGoHome }: Props) {
         question.answer.toLowerCase().includes(search.toLowerCase());
       const matchTag = filterTag === 'all' || question.tags.includes(filterTag);
       const matchCompany = filterCompany === 'all' || job.company === filterCompany;
-      return matchSearch && matchTag && matchCompany;
+      const matchDepartment = filterDepartment === 'all' || job.department === filterDepartment;
+      return matchSearch && matchTag && matchCompany && matchDepartment;
     });
-  }, [allItems, search, filterTag, filterCompany]);
+  }, [allItems, search, filterTag, filterCompany, filterDepartment]);
 
   return (
     <div className="experience-view">
@@ -83,31 +89,48 @@ export function ExperienceView({ jobs, onSelectJob, onGoHome }: Props) {
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
-            <div className="filter-row">
-              <label className="filter-label">标签筛选</label>
-              <select
-                className="input select-input experience-select"
-                value={filterTag}
-                onChange={e => setFilterTag(e.target.value)}
-              >
-                <option value="all">全部标签</option>
-                {tags.map(t => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            <div className="filter-row">
-              <label className="filter-label">公司筛选</label>
-              <select
-                className="input select-input experience-select"
-                value={filterCompany}
-                onChange={e => setFilterCompany(e.target.value)}
-              >
-                <option value="all">全部公司</option>
-                {companies.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+            <div className="filter-row-group">
+              <div className="filter-row">
+                <label className="filter-label">标签</label>
+                <select
+                  className="input select-input experience-select"
+                  value={filterTag}
+                  onChange={e => setFilterTag(e.target.value)}
+                >
+                  <option value="all">全部</option>
+                  {tags.map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="filter-row">
+                <label className="filter-label">公司</label>
+                <select
+                  className="input select-input experience-select"
+                  value={filterCompany}
+                  onChange={e => setFilterCompany(e.target.value)}
+                >
+                  <option value="all">全部</option>
+                  {companies.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              {departments.length > 0 && (
+                <div className="filter-row">
+                  <label className="filter-label">部门</label>
+                  <select
+                    className="input select-input experience-select"
+                    value={filterDepartment}
+                    onChange={e => setFilterDepartment(e.target.value)}
+                  >
+                    <option value="all">全部</option>
+                    {departments.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           </div>
 
