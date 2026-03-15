@@ -111,11 +111,11 @@ app.get('/jobs', authMiddleware, async (req, res) => {
 
 app.post('/jobs', authMiddleware, async (req, res) => {
   try {
-    const { company, position, salary, tags, notes, status } = req.body;
-    const [result] = await pool.query(
-      `INSERT INTO job_applications (user_id, company, position, salary, tags, notes, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [req.userId, company, position, salary || '', JSON.stringify(tags || []), notes || '', status || 'active']
+    const { company, position, department, salary, tags, notes, status } = req.body;
+    await pool.query(
+      `INSERT INTO job_applications (user_id, company, position, department, salary, tags, notes, status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [req.userId, company, position, department || '', salary || '', JSON.stringify(tags || []), notes || '', status || 'active']
     );
     const [rows] = await pool.query(`SELECT * FROM job_applications WHERE id = (SELECT id FROM job_applications WHERE user_id = ? ORDER BY created_at DESC LIMIT 1)`, [req.userId]);
     res.json({ ...rows[0], tags: parseJSON(rows[0].tags), rounds: [] });
@@ -128,12 +128,12 @@ app.post('/jobs', authMiddleware, async (req, res) => {
 app.put('/jobs/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const { company, position, salary, tags, notes, status } = req.body;
+    const { company, position, department, salary, tags, notes, status } = req.body;
     await pool.query(
       `UPDATE job_applications 
-       SET company = ?, position = ?, salary = ?, tags = ?, notes = ?, status = ?
+       SET company = ?, position = ?, department = ?, salary = ?, tags = ?, notes = ?, status = ?
        WHERE id = ? AND user_id = ?`,
-      [company, position, salary, JSON.stringify(tags), notes, status, id, req.userId]
+      [company, position, department || '', salary, JSON.stringify(tags), notes, status, id, req.userId]
     );
     const [rows] = await pool.query(`SELECT * FROM job_applications WHERE id = ?`, [id]);
     if (rows.length === 0) return res.status(404).json({ message: '未找到' });

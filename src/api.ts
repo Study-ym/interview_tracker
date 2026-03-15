@@ -1,6 +1,11 @@
+import { clearAuth } from './auth';
+
 // API 基础配置
 // 开发时指向本地后端，生产时改为你的服务器地址
 export const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+
+/** 401 时触发，便于 App 统一跳转登录 */
+export const AUTH_LOGOUT_EVENT = 'auth:logout';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('auth_token');
@@ -12,6 +17,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       ...options.headers,
     },
   });
+  if (res.status === 401) {
+    clearAuth();
+    window.dispatchEvent(new CustomEvent(AUTH_LOGOUT_EVENT));
+    const err = await res.json().catch(() => ({ message: '登录已过期，请重新登录' }));
+    throw new Error(err.message ?? '登录已过期，请重新登录');
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
     throw new Error(err.message ?? '请求失败');
@@ -92,6 +103,7 @@ export type JobApplicationDTO = {
   id: string;
   company: string;
   position: string;
+  department: string;
   salary: string;
   tags: string[];
   notes: string;

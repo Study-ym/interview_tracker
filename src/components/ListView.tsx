@@ -101,7 +101,7 @@ export function ListView({ jobs, onSelect, onNew, onDelete }: Props) {
                     <div className="card-header">
                       <div className="card-title-group">
                         <span className="card-company">{job.company}</span>
-                        <span className="card-position">{job.position}</span>
+                        <span className="card-position">{job.position}{(job.department ?? '') && ` · ${job.department}`}</span>
                         {job.salary && <span className="card-round">{job.salary}</span>}
                       </div>
                       <span

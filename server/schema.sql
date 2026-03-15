@@ -22,6 +22,7 @@ CREATE TABLE `job_applications` (
   `user_id` VARCHAR(36) NOT NULL COMMENT '用户ID',
   `company` VARCHAR(255) NOT NULL COMMENT '公司名称',
   `position` VARCHAR(255) NOT NULL COMMENT '应聘岗位',
+  `department` VARCHAR(100) DEFAULT '' COMMENT '部门',
   `salary` VARCHAR(100) DEFAULT '' COMMENT '薪资范围',
   `tags` JSON DEFAULT NULL COMMENT '标签（JSON数组）',
   `notes` TEXT DEFAULT NULL COMMENT '整体备注',
@@ -34,6 +35,9 @@ CREATE TABLE `job_applications` (
   KEY `idx_status` (`status`),
   CONSTRAINT `fk_job_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='投递记录表';
+
+-- 若表已存在且无 department 列，请执行:
+-- ALTER TABLE job_applications ADD COLUMN department VARCHAR(100) DEFAULT '' COMMENT '部门' AFTER position;
 
 -- 3. 面试轮次表
 DROP TABLE IF EXISTS `rounds`;

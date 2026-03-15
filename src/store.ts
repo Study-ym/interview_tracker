@@ -7,6 +7,7 @@ function dtoToJob(dto: JobApplicationDTO): JobApplication {
     id: dto.id,
     company: dto.company,
     position: dto.position,
+    department: dto.department ?? '',
     salary: dto.salary,
     tags: dto.tags,
     notes: dto.notes,
@@ -37,10 +38,10 @@ function dtoToJob(dto: JobApplicationDTO): JobApplication {
 
 // ─── 加载数据（从后端或 localStorage 降级）───
 export function loadJobs(): JobApplication[] {
-  // 先尝试从 localStorage 读取（离线支持）
   try {
     const raw = localStorage.getItem('interview_tracker_v2');
-    return raw ? JSON.parse(raw) : [];
+    const list: JobApplication[] = raw ? JSON.parse(raw) : [];
+    return list.map(j => ({ ...j, department: j.department ?? '' }));
   } catch {
     return [];
   }
@@ -66,11 +67,12 @@ export async function syncFromServer(): Promise<JobApplication[]> {
 
 // ─── JobApplication CRUD（调用后端）───
 export async function createJobOnServer(
-  data: Pick<JobApplication, 'company' | 'position' | 'salary' | 'tags' | 'notes'>
+  data: Pick<JobApplication, 'company' | 'position' | 'department' | 'salary' | 'tags' | 'notes'>
 ): Promise<JobApplication> {
   const dto = await jobApi.create({
     company: data.company,
     position: data.position,
+    department: data.department ?? '',
     salary: data.salary,
     tags: data.tags,
     notes: data.notes,
@@ -86,12 +88,15 @@ export async function updateJobOnServer(job: JobApplication): Promise<JobApplica
   const dto = await jobApi.update(job.id, {
     company: job.company,
     position: job.position,
+    department: job.department ?? '',
     salary: job.salary,
     tags: job.tags,
     notes: job.notes,
     status: job.status,
   });
-  return dtoToJob(dto);
+  // PUT /jobs 不返回 rounds，用当前 job 的 rounds 合并
+  const base = dtoToJob({ ...dto, rounds: dto.rounds ?? [] });
+  return { ...base, rounds: job.rounds };
 }
 
 export async function deleteJobOnServer(id: string): Promise<void> {
@@ -173,11 +178,12 @@ function uid(prefix: string) {
 }
 
 export function createJob(
-  data: Pick<JobApplication, 'company' | 'position' | 'salary' | 'tags' | 'notes'>
+  data: Pick<JobApplication, 'company' | 'position' | 'department' | 'salary' | 'tags' | 'notes'>
 ): JobApplication {
   const now = Date.now();
   return {
     ...data,
+    department: data.department ?? '',
     id: uid('job'),
     status: 'active',
     rounds: [],

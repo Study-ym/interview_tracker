@@ -30,6 +30,7 @@ export type JobApplication = {
   id: string;
   company: string;
   position: string;
+  department: string; // 部门
   salary: string;
   tags: string[];
   notes: string;      // 整体想法/备注

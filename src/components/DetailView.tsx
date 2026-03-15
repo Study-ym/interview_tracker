@@ -8,6 +8,8 @@ import {
 import {
   createQuestion, addQuestion, updateQuestion, deleteQuestion,
   updateRound, deleteRound,
+  updateJobOnServer, deleteRoundOnServer,
+  createQuestionOnServer, updateQuestionOnServer, deleteQuestionOnServer,
 } from '../store';
 
 interface Props {
@@ -34,27 +36,45 @@ export function DetailView({ job, onChange, onEdit, onAddRound, onEditRound, onD
   const [notesVal, setNotesVal] = useState(job.notes);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmDeleteRound, setConfirmDeleteRound] = useState<string | null>(null);
+  const [notesSaving, setNotesSaving] = useState(false);
+  const [questionSaving, setQuestionSaving] = useState(false);
 
-  function saveNotes() {
-    onChange({ ...job, notes: notesVal, updatedAt: Date.now() });
-    setEditingNotes(false);
+  async function saveNotes() {
+    setNotesSaving(true);
+    try {
+      const updated = await updateJobOnServer({ ...job, notes: notesVal, updatedAt: Date.now() });
+      onChange(updated);
+      setEditingNotes(false);
+    } catch (e) {
+      console.error('保存备注失败', e);
+    } finally {
+      setNotesSaving(false);
+    }
   }
 
-  function submitQuestion(round: Round) {
+  async function submitQuestion(round: Round) {
     if (!qForm.content.trim()) return;
     const tags = qForm.tags.split(',').map(t => t.trim()).filter(Boolean);
-    let updatedRound: Round;
-    if (editingQ) {
-      const existing = round.questions.find(q => q.id === editingQ.qId)!;
-      updatedRound = updateQuestion(round, { ...existing, content: qForm.content, answer: qForm.answer, tags });
-      setEditingQ(null);
-    } else {
-      const q = createQuestion(qForm.content, qForm.answer, tags);
-      updatedRound = addQuestion(round, q);
-      setAddingQRoundId(null);
+    setQuestionSaving(true);
+    try {
+      let updatedRound: Round;
+      if (editingQ) {
+        const existing = round.questions.find(q => q.id === editingQ.qId)!;
+        const serverQ = await updateQuestionOnServer(round.id, { ...existing, content: qForm.content, answer: qForm.answer, tags });
+        updatedRound = updateQuestion(round, serverQ);
+        setEditingQ(null);
+      } else {
+        const serverQ = await createQuestionOnServer(round.id, { content: qForm.content, answer: qForm.answer, tags });
+        updatedRound = addQuestion(round, serverQ);
+        setAddingQRoundId(null);
+      }
+      onChange(updateRound(job, updatedRound));
+      setQForm(EMPTY_Q);
+    } catch (e) {
+      console.error('保存题目失败', e);
+    } finally {
+      setQuestionSaving(false);
     }
-    onChange(updateRound(job, updatedRound));
-    setQForm(EMPTY_Q);
   }
 
   function startEditQ(round: Round, q: Question) {
@@ -79,7 +99,7 @@ export function DetailView({ job, onChange, onEdit, onAddRound, onEditRound, onD
             {JOB_STATUS_LABEL[job.status]}
           </span>
         </div>
-        <div className="detail-position">{job.position}</div>
+        <div className="detail-position">{job.position}{(job.department ?? '') && ` · ${job.department}`}</div>
         <div className="detail-meta-chips">
           {job.salary && <span className="meta-chip">💰 {job.salary}</span>}
           <span className="meta-chip">🔄 {job.rounds.length} 轮面试</span>
@@ -120,7 +140,7 @@ export function DetailView({ job, onChange, onEdit, onAddRound, onEditRound, onD
             />
             <div className="inline-actions">
               <button className="btn btn-ghost" onClick={() => setEditingNotes(false)}>取消</button>
-              <button className="btn btn-primary" onClick={saveNotes}>保存</button>
+              <button className="btn btn-primary" onClick={saveNotes} disabled={notesSaving}>{notesSaving ? '保存中…' : '保存'}</button>
             </div>
           </div>
         ) : (
@@ -171,7 +191,6 @@ export function DetailView({ job, onChange, onEdit, onAddRound, onEditRound, onD
                   {isExpanded && (
                     <div className="round-body">
                       <div className="round-meta-row">
-                        {round.interviewer && <span className="meta-chip">👤 {round.interviewer}</span>}
                         {round.location && <span className="meta-chip">📍 {round.location}</span>}
                         <span className="meta-chip">💬 {round.questions.length} 题</span>
                       </div>
@@ -205,7 +224,7 @@ export function DetailView({ job, onChange, onEdit, onAddRound, onEditRound, onD
                             </div>
                             <div className="inline-actions">
                               <button className="btn btn-ghost" onClick={cancelQForm}>取消</button>
-                              <button className="btn btn-primary" onClick={() => submitQuestion(round)}>{isEditingQ ? '更新' : '添加'}</button>
+                              <button className="btn btn-primary" onClick={() => submitQuestion(round)} disabled={questionSaving}>{questionSaving ? '保存中…' : isEditingQ ? '更新' : '添加'}</button>
                             </div>
                           </div>
                         )}
@@ -236,7 +255,14 @@ export function DetailView({ job, onChange, onEdit, onAddRound, onEditRound, onD
                                     )}
                                     <div className="q-item-actions">
                                       <button className="btn-link" onClick={() => startEditQ(round, q)}>编辑</button>
-                                      <button className="btn-link btn-link-danger" onClick={() => onChange(updateRound(job, deleteQuestion(round, q.id)))}>删除</button>
+                                      <button className="btn-link btn-link-danger" onClick={async () => {
+                      try {
+                        await deleteQuestionOnServer(round.id, q.id);
+                        onChange(updateRound(job, deleteQuestion(round, q.id)));
+                      } catch (e) {
+                        console.error('删除题目失败', e);
+                      }
+                    }}>删除</button>
                                     </div>
                                   </div>
                                 )}
@@ -276,7 +302,15 @@ export function DetailView({ job, onChange, onEdit, onAddRound, onEditRound, onD
             <p>该轮次的所有题目记录将一并删除，无法恢复。</p>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={() => setConfirmDeleteRound(null)}>取消</button>
-              <button className="btn btn-danger" onClick={() => { onChange(deleteRound(job, confirmDeleteRound)); setConfirmDeleteRound(null); }}>删除</button>
+              <button className="btn btn-danger" onClick={async () => {
+              try {
+                await deleteRoundOnServer(job.id, confirmDeleteRound);
+                onChange(deleteRound(job, confirmDeleteRound));
+                setConfirmDeleteRound(null);
+              } catch (e) {
+                console.error('删除轮次失败', e);
+              }
+            }}>删除</button>
             </div>
           </div>
         </div>
