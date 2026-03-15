@@ -546,4 +546,58 @@ a { color: inherit; text-decoration: none; }
 }
 .round-q-draft-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .round-q-draft-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ─── 打赏入口 ─── */
+.tip-banner {
+  display: flex; align-items: center; gap: 10px;
+  margin: 20px 0 80px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(79,127,255,0.08), rgba(139,92,246,0.08));
+  border: 1px solid rgba(79,127,255,0.2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tip-banner:hover { border-color: rgba(79,127,255,0.5); background: linear-gradient(135deg, rgba(79,127,255,0.12), rgba(139,92,246,0.12)); }
+.tip-banner__icon { font-size: 20px; flex-shrink: 0; }
+.tip-banner__text { flex: 1; font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+.tip-banner__arrow { font-size: 18px; color: var(--accent); flex-shrink: 0; }
+
+/* ─── 打赏弹窗 ─── */
+.tip-modal {
+  max-width: 340px !important;
+  text-align: center;
+  position: relative;
+}
+.tip-modal__close {
+  position: absolute; top: 12px; right: 12px;
+  background: none; border: none; font-size: 16px;
+  color: var(--text-muted); cursor: pointer; padding: 4px 8px;
+  border-radius: 6px;
+}
+.tip-modal__close:hover { background: var(--bg-card-hover); }
+.tip-modal__header { margin-bottom: 20px; }
+.tip-modal__icon { font-size: 40px; display: block; margin-bottom: 10px; }
+.tip-modal__title { font-size: 18px; font-weight: 800; color: var(--text-primary); margin: 0 0 8px; }
+.tip-modal__desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+.tip-modal__qr-area {
+  display: flex; gap: 16px; justify-content: center; margin-bottom: 16px;
+}
+.tip-qr-card {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.tip-qr-placeholder {
+  width: 120px; height: 120px;
+  background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+  border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px;
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+.tip-qr-placeholder--alipay {
+  background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+}
+.tip-qr-hint { font-size: 10px; font-weight: 400; opacity: 0.85; }
+.tip-qr-label { font-size: 12px; color: var(--text-muted); }
+.tip-modal__thanks { font-size: 12px; color: var(--text-muted); margin: 0; }
 .form-hint { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }

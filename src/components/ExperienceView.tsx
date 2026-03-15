@@ -43,6 +43,7 @@ export function ExperienceView({ jobs, onSelectJob, onGoHome }: Props) {
   const [filterCompany, setFilterCompany] = useState<string | 'all'>('all');
   const [filterDepartment, setFilterDepartment] = useState<string | 'all'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showTip, setShowTip] = useState(false);
 
   const allItems = useMemo(() => flattenQuestions(jobs), [jobs]);
   const tags = useMemo(() => getAllTags(jobs), [jobs]);
@@ -192,7 +193,42 @@ export function ExperienceView({ jobs, onSelectJob, onGoHome }: Props) {
               })}
             </div>
           )}
+          <button className="tip-banner" style={{width:'100%', marginTop:'16px', marginBottom:'80px'}} onClick={() => setShowTip(true)}>
+            <span className="tip-banner__icon">☕</span>
+            <span className="tip-banner__text">如果面试本对你有帮助，请作者喝杯咖啡</span>
+            <span className="tip-banner__arrow">›</span>
+          </button>
         </>
+      )}
+
+      {showTip && (
+        <div className="modal-overlay" onClick={() => setShowTip(false)}>
+          <div className="modal tip-modal" onClick={e => e.stopPropagation()}>
+            <button className="tip-modal__close" onClick={() => setShowTip(false)}>✕</button>
+            <div className="tip-modal__header">
+              <span className="tip-modal__icon">☕</span>
+              <h3 className="tip-modal__title">请作者喝杯咖啡</h3>
+              <p className="tip-modal__desc">面试本完全免费，如果帮到你了，欢迎打赏支持一下 🙏</p>
+            </div>
+            <div className="tip-modal__qr-area">
+              <div className="tip-qr-card">
+                <div className="tip-qr-placeholder">
+                  <span>微信收款码</span>
+                  <span className="tip-qr-hint">替换为你的二维码图片</span>
+                </div>
+                <span className="tip-qr-label">微信扫一扫</span>
+              </div>
+              <div className="tip-qr-card">
+                <div className="tip-qr-placeholder tip-qr-placeholder--alipay">
+                  <span>支付宝收款码</span>
+                  <span className="tip-qr-hint">替换为你的二维码图片</span>
+                </div>
+                <span className="tip-qr-label">支付宝扫一扫</span>
+              </div>
+            </div>
+            <p className="tip-modal__thanks">感谢你的支持！每一份打赏都是继续更新的动力 ❤️</p>
+          </div>
+        </div>
       )}
     </div>
   );
