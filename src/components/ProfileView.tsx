@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { JobApplication } from '../types';
 import type { AuthUser } from '../auth';
 
@@ -39,13 +38,13 @@ function exportAsJson(jobs: JobApplication[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `面试日志-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `面试本-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
 
 function exportAsMarkdown(jobs: JobApplication[]) {
-  const lines: string[] = ['# 面试日志导出', '', `导出时间：${new Date().toLocaleString('zh-CN')}`, ''];
+  const lines: string[] = ['# 面试本导出', '', `导出时间：${new Date().toLocaleString('zh-CN')}`, ''];
 
   for (const j of jobs) {
     lines.push(`## ${j.company} - ${j.position}`);
@@ -79,13 +78,12 @@ function exportAsMarkdown(jobs: JobApplication[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `面试日志-${new Date().toISOString().slice(0, 10)}.md`;
+  a.download = `面试本-${new Date().toISOString().slice(0, 10)}.md`;
   a.click();
   URL.revokeObjectURL(url);
 }
 
 export function ProfileView({ user, jobs, onLogout }: Props) {
-  const [showTip, setShowTip] = useState(false);
   const totalJobs = jobs.length;
   const totalRounds = jobs.reduce((s, j) => s + j.rounds.length, 0);
   const offerCount = jobs.filter(j => j.status === 'offer').length;
@@ -157,7 +155,7 @@ export function ProfileView({ user, jobs, onLogout }: Props) {
         <h3 className="section-label">关于</h3>
         <div className="profile-card">
           <div className="profile-row">
-            <span className="profile-label">面试日志</span>
+            <span className="profile-label">面试本</span>
             <span className="profile-value">记录每一次面试，复盘成长</span>
           </div>
         </div>
@@ -168,42 +166,6 @@ export function ProfileView({ user, jobs, onLogout }: Props) {
           退出登录
         </button>
       </div>
-
-      <button className="tip-banner" style={{width:'100%', marginBottom:'80px'}} onClick={() => setShowTip(true)}>
-        <span className="tip-banner__icon">☕</span>
-        <span className="tip-banner__text">如果面试本对你有帮助，请作者喝杯咖啡</span>
-        <span className="tip-banner__arrow">›</span>
-      </button>
-
-      {showTip && (
-        <div className="modal-overlay" onClick={() => setShowTip(false)}>
-          <div className="modal tip-modal" onClick={e => e.stopPropagation()}>
-            <button className="tip-modal__close" onClick={() => setShowTip(false)}>✕</button>
-            <div className="tip-modal__header">
-              <span className="tip-modal__icon">☕</span>
-              <h3 className="tip-modal__title">请作者喝杯咖啡</h3>
-              <p className="tip-modal__desc">面试本完全免费，如果帮到你了，欢迎打赏支持一下 🙏</p>
-            </div>
-            <div className="tip-modal__qr-area">
-              <div className="tip-qr-card">
-                <div className="tip-qr-placeholder">
-                  <span>微信收款码</span>
-                  <span className="tip-qr-hint">替换为你的二维码图片</span>
-                </div>
-                <span className="tip-qr-label">微信扫一扫</span>
-              </div>
-              <div className="tip-qr-card">
-                <div className="tip-qr-placeholder tip-qr-placeholder--alipay">
-                  <span>支付宝收款码</span>
-                  <span className="tip-qr-hint">替换为你的二维码图片</span>
-                </div>
-                <span className="tip-qr-label">支付宝扫一扫</span>
-              </div>
-            </div>
-            <p className="tip-modal__thanks">感谢你的支持！每一份打赏都是继续更新的动力 ❤️</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

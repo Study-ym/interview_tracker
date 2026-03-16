@@ -108,7 +108,7 @@ export default function App() {
         <div className="header-inner">
           <button className="logo-btn" onClick={goHome}>
             <span className="logo-icon">⌥</span>
-            <span className="logo-text">面试日志</span>
+            <span className="logo-text">面试本</span>
           </button>
           <div className="header-right">
             {tab === 'home' && view.type === 'list' && (

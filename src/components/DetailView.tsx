@@ -285,7 +285,7 @@ export function DetailView({ job, onChange, onEdit, onAddRound, onEditRound, onD
         <div className="modal-overlay" onClick={() => setConfirmDelete(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h3>确认删除？</h3>
-            <p>删除「{job.company} - {job.position}」及所有面试日志，无法恢复。</p>
+            <p>删除「{job.company} - {job.position}」及所有面试本，无法恢复。</p>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={() => setConfirmDelete(false)}>取消</button>
               <button className="btn btn-danger" onClick={onDelete}>删除</button>

@@ -15,7 +15,6 @@ export function ListView({ jobs, onSelect, onNew, onDelete }: Props) {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<JobStatus | 'all'>('all');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [showTip, setShowTip] = useState(false);
 
   const filtered = jobs.filter(j => {
     const matchSearch =
@@ -111,7 +110,6 @@ export function ListView({ jobs, onSelect, onNew, onDelete }: Props) {
                       >{JOB_STATUS_LABEL[job.status]}</span>
                     </div>
 
-                    {/* 轮次进度 */}
                     {job.rounds.length > 0 && (
                       <div className="rounds-progress">
                         {job.rounds.map((r, i) => (
@@ -155,13 +153,6 @@ export function ListView({ jobs, onSelect, onNew, onDelete }: Props) {
               })
             )}
           </div>
-
-          {/* 打赏入口 */}
-          <div className="tip-banner" onClick={() => setShowTip(true)}>
-            <span className="tip-banner__icon">☕</span>
-            <span className="tip-banner__text">如果面试本对你有帮助，请作者喝杯咖啡</span>
-            <span className="tip-banner__arrow">›</span>
-          </div>
         </>
       )}
 
@@ -169,41 +160,11 @@ export function ListView({ jobs, onSelect, onNew, onDelete }: Props) {
         <div className="modal-overlay" onClick={() => setConfirmDelete(null)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <h3>确认删除？</h3>
-            <p>将删除该公司的所有面试日志，无法恢复。</p>
+            <p>将删除该公司的所有面试本，无法恢复。</p>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={() => setConfirmDelete(null)}>取消</button>
               <button className="btn btn-danger" onClick={() => { onDelete(confirmDelete); setConfirmDelete(null); }}>删除</button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {showTip && (
-        <div className="modal-overlay" onClick={() => setShowTip(false)}>
-          <div className="modal tip-modal" onClick={e => e.stopPropagation()}>
-            <button className="tip-modal__close" onClick={() => setShowTip(false)}>✕</button>
-            <div className="tip-modal__header">
-              <span className="tip-modal__icon">☕</span>
-              <h3 className="tip-modal__title">请作者喝杯咖啡</h3>
-              <p className="tip-modal__desc">面试本完全免费，如果帮到你了，欢迎打赏支持一下 🙏</p>
-            </div>
-            <div className="tip-modal__qr-area">
-              <div className="tip-qr-card">
-                <div className="tip-qr-placeholder">
-                  <span>微信收款码</span>
-                  <span className="tip-qr-hint">替换为你的二维码图片</span>
-                </div>
-                <span className="tip-qr-label">微信扫一扫</span>
-              </div>
-              <div className="tip-qr-card">
-                <div className="tip-qr-placeholder tip-qr-placeholder--alipay">
-                  <span>支付宝收款码</span>
-                  <span className="tip-qr-hint">替换为你的二维码图片</span>
-                </div>
-                <span className="tip-qr-label">支付宝扫一扫</span>
-              </div>
-            </div>
-            <p className="tip-modal__thanks">感谢你的支持！每一份打赏都是继续更新的动力 ❤️</p>
           </div>
         </div>
       )}

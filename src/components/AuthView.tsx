@@ -67,7 +67,7 @@ export function AuthView({ onLogin }: Props) {
       <div className="auth-card">
         <div className="auth-logo">
           <span className="logo-icon">⌥</span>
-          <span className="logo-text">面试日志</span>
+          <span className="logo-text">面试本</span>
         </div>
         <p className="auth-subtitle">记录每一次面试，复盘成长</p>
 
