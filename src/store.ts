@@ -78,8 +78,8 @@ export async function createJobOnServer(
     notes: data.notes,
     status: 'active',
     rounds: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   });
   return dtoToJob(dto);
 }
@@ -108,7 +108,12 @@ export async function createRoundOnServer(
   jobId: string,
   data: Pick<Round, 'name' | 'date' | 'time' | 'status' | 'location' | 'interviewer' | 'notes'>
 ): Promise<Round> {
-  const dto = await roundApi.create(jobId, data);
+  const dto = await roundApi.create(jobId, {
+    ...data,
+    questions: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  } as any);
   return {
     id: dto.id,
     name: dto.name,
@@ -149,7 +154,10 @@ export async function createQuestionOnServer(
   roundId: string,
   data: Pick<Question, 'content' | 'answer' | 'tags'>
 ): Promise<Question> {
-  const dto = await questionApi.create(roundId, data);
+  const dto = await questionApi.create(roundId, {
+    ...data,
+    created_at: new Date().toISOString(),
+  } as any);
   return {
     id: dto.id,
     content: dto.content,
@@ -160,7 +168,7 @@ export async function createQuestionOnServer(
 }
 
 export async function updateQuestionOnServer(roundId: string, question: Question): Promise<Question> {
-  const dto = await questionApi.update(roundId, question.id, {
+  await questionApi.update(roundId, question.id, {
     content: question.content,
     answer: question.answer,
     tags: question.tags,

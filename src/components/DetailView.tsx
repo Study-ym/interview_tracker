@@ -6,7 +6,7 @@ import {
   formatDate, timeAgo,
 } from '../utils';
 import {
-  createQuestion, addQuestion, updateQuestion, deleteQuestion,
+  addQuestion, updateQuestion, deleteQuestion,
   updateRound, deleteRound,
   updateJobOnServer, deleteRoundOnServer,
   createQuestionOnServer, updateQuestionOnServer, deleteQuestionOnServer,
