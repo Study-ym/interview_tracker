@@ -9,7 +9,6 @@ import {
   saveVerificationCode,
   verifyCode,
   getOrCreateUser,
-  sendSMS,
 } from './auth.js';
 
 dotenv.config();
@@ -33,6 +32,8 @@ app.use(express.json());
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // ─── 认证路由 ───
+// ─── 认证路由 ───
+// 开发模式：发送验证码（用于网页调试）
 app.post('/auth/send-code', async (req, res) => {
   try {
     const { phone } = req.body;
@@ -42,15 +43,15 @@ app.post('/auth/send-code', async (req, res) => {
     
     const code = generateCode();
     await saveVerificationCode(phone, code);
-    await sendSMS(phone, code);
     
-    res.json({ message: '验证码已发送' });
+    res.json({ message: '验证码已发送（开发模式，查看服务器日志）' });
   } catch (error) {
     console.error('发送验证码失败:', error);
-    res.status(500).json({ message: '发送失败，请稍后重试' });
+    res.status(500).json({ message: '发送失败' });
   }
 });
 
+// 开发模式：验证验证码（用于网页调试）
 app.post('/auth/verify-code', async (req, res) => {
   try {
     const { phone, code } = req.body;
@@ -67,6 +68,23 @@ app.post('/auth/verify-code', async (req, res) => {
   } catch (error) {
     console.error('验证失败:', error);
     res.status(500).json({ message: '验证失败' });
+  }
+});
+
+// 生产模式：号码认证登录（App 端调用）
+app.post('/auth/login-phone', async (req, res) => {
+  try {
+    const { phone } = req.body;
+    // 生产环境：这里应该验证阿里云号码认证的 token
+    // 现在先简化，直接用 phone 登录
+    
+    const user = await getOrCreateUser(phone);
+    const token = generateToken(user.id);
+    
+    res.json({ token, user });
+  } catch (error) {
+    console.error('登录失败:', error);
+    res.status(500).json({ message: '登录失败' });
   }
 });
 
