@@ -2,7 +2,7 @@ import { clearAuth } from './auth';
 
 // API 基础配置
 // 开发时指向本地后端，生产时改为你的服务器地址
-export const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+export const API_BASE = '/api';
 
 /** 401 时触发，便于 App 统一跳转登录 */
 export const AUTH_LOGOUT_EVENT = 'auth:logout';
